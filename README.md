@@ -1,17 +1,16 @@
 # Mechatronics, Control & Robotics Portfolio
-**Danial Heidar** — B.Sc. Student in Mechanical Engineering, University of Tehran
+**Danial Heidar** — B.Sc. Student in Mechanical Engineering, University of Tehran[cite: 1]
 
 This repository organizes my coursework and personal programming projects in **Control Systems**, **Robot Kinematics**, and **AI/Search Algorithms**.
 
 ---
 
 ## 1. Rotary Inverted Pendulum — Dynamic Modeling & Control
-* **Folder:** [`./Rotary-Inverted-Pendulum`](./Rotary-Inverted-Pendulum)
-* **Report:** [`Control_Project_Report.pdf`](./Rotary-Inverted-Pendulum/Control_Project_Report.pdf) *(Group project; my primary role was dynamic modeling, stability analysis, and controller design)*
+* **Project Report:** [`Control_Project_Report.pdf`](./Control_Project_Report.pdf) *(Group project; my primary role was dynamic modeling, stability analysis, and controller design)*[cite: 1, 2]
 * **Overview:**
-  * Derived nonlinear Euler-Lagrange equations of motion and linearized the system around the unstable upright equilibrium.
-  * Designed and evaluated **P, PI, PD, PID** controllers and a **Lead Compensator** in **MATLAB** using Root Locus, Bode, and Nyquist analyses.
-  * Collaborated with teammates responsible for SolidWorks CAD modeling and Proteus/Arduino hardware simulation.
+  * Derived nonlinear Euler-Lagrange equations of motion and linearized the system around the unstable upright equilibrium[cite: 7, 8].
+  * Designed and evaluated **P, PI, PD, PID** controllers and a **Lead Compensator** in **MATLAB** using Root Locus, Bode, and Nyquist stability analyses[cite: 2, 16, 17].
+  * Collaborated with teammates responsible for SolidWorks CAD modeling and Proteus/Arduino hardware simulation[cite: 17, 21].
 
 ---
 
@@ -24,8 +23,6 @@ This repository organizes my coursework and personal programming projects in **C
 ---
 
 ## 3. AI & Algorithmic Programming Projects (Python)
-* **Folder:** [`./AI-Algorithms-Python`](./AI-Algorithms-Python)
-* **Projects:**
-  * **Constraint-Propagation Sudoku Solver (`sudoku_solver_gui.py`):** Combines **Naked/Hidden Singles** inference over a `9×9×9` candidate matrix with **Minimum Remaining Values (MRV)** heuristic branching and iterative stack-based backtracking, wrapped in a **Pygame** GUI.
-  * **AlphaZero Practice Implementations (Backgammon, Fading Tic-Tac-Toe, Tic-Tac-Toe):** Self-play agents integrating Monte Carlo Tree Search (MCTS) with neural networks, adapted to stochastic dice transitions in Backgammon.
-  * **Neural Pong:** Real-time paddle control agent trained via neural networks.
+* **Constraint-Propagation Sudoku Solver (`sudoku_solver_gui.py`):** Combines **Naked/Hidden Singles** inference over a `9×9×9` candidate matrix with **Minimum Remaining Values (MRV)** heuristic branching and iterative stack-based backtracking, wrapped in a **Pygame** GUI.
+* **AlphaZero Practice Implementations (Backgammon, Fading Tic-Tac-Toe, Tic-Tac-Toe):** Self-play agents integrating Monte Carlo Tree Search (MCTS) with neural networks, adapted to stochastic dice transitions in Backgammon.
+* **Neural Pong:** Real-time paddle control agent trained via neural networks.

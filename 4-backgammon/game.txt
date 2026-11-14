@@ -1,0 +1,767 @@
+from dataclasses import dataclass
+import random
+
+
+# =========================================================
+# Constants
+# =========================================================
+
+WHITE = 1
+BLACK = -1
+
+BAR = -1
+OFF = 24
+
+
+# =========================================================
+# Move
+# =========================================================
+
+@dataclass(frozen=True)
+class Move:
+    source: int
+    destination: int
+    die: int
+    die_index: int = 0
+
+
+# =========================================================
+# Backgammon
+# =========================================================
+
+class Backgammon:
+
+    def __init__(self):
+
+        # -------------------------------------------------
+        # Standard initial position
+        #
+        # Internal points:
+        # 0 ... 23
+        #
+        # WHITE moves: 0 -> 23
+        # BLACK moves: 23 -> 0
+        # -------------------------------------------------
+
+        self.points = [
+            2, 0, 0, 0, 0, -5,
+            0, -3, 0, 0, 0, 5,
+            -5, 0, 0, 0, 3, 0,
+            5, 0, 0, 0, 0, -2
+        ]
+
+        self.bar = {
+            WHITE: 0,
+            BLACK: 0
+        }
+
+        self.borne_off = {
+            WHITE: 0,
+            BLACK: 0
+        }
+
+        self.current_player = WHITE
+
+        self.dice = []
+
+        self.done = False
+        self.winner = None
+
+    # =====================================================
+    # Basic helpers
+    # =====================================================
+
+    def opponent(self, player):
+        return -player
+
+    # =====================================================
+    # Dice
+    # =====================================================
+
+    def roll_dice(self):
+
+        if self.done:
+            return []
+
+        d1 = random.randint(1, 6)
+        d2 = random.randint(1, 6)
+
+        if d1 == d2:
+            self.dice = [
+                d1,
+                d1,
+                d1,
+                d1
+            ]
+        else:
+            self.dice = [
+                d1,
+                d2
+            ]
+
+        return list(self.dice)
+
+    # =====================================================
+    # Destination
+    # =====================================================
+
+    def destination_for_die(
+        self,
+        source,
+        die,
+        player
+    ):
+
+        if player == WHITE:
+            return source + die
+
+        return source - die
+
+    # =====================================================
+    # Block
+    # =====================================================
+
+    def is_blocked(
+        self,
+        destination,
+        player
+    ):
+
+        if destination < 0 or destination >= 24:
+            return False
+
+        opponent = self.opponent(player)
+
+        return (
+            self.points[destination] * opponent >= 2
+        )
+
+    # =====================================================
+    # Home board
+    # =====================================================
+
+    def all_checkers_home(self, player):
+
+        if self.bar[player] > 0:
+            return False
+
+        if player == WHITE:
+
+            # WHITE home = points 19..24
+            for i in range(18):
+
+                if self.points[i] > 0:
+                    return False
+
+        else:
+
+            # BLACK home = points 1..6
+            for i in range(6, 24):
+
+                if self.points[i] < 0:
+                    return False
+
+        return True
+
+    # =====================================================
+    # Bear off
+    # =====================================================
+
+    def can_bear_off(
+        self,
+        source,
+        die,
+        player
+    ):
+
+        if not self.all_checkers_home(player):
+            return False
+
+        if player == WHITE:
+
+            # Point 24 / index 23 requires die 1
+            distance = 24 - source
+
+            if die == distance:
+                return True
+
+            if die > distance:
+
+                # Larger die may be used only if
+                # there is no checker farther away
+                # from the bear-off edge.
+
+                for i in range(18, source):
+
+                    if self.points[i] > 0:
+                        return False
+
+                return True
+
+            return False
+
+        # -------------------------------------------------
+        # BLACK
+        #
+        # point 1 / index 0 requires die 1
+        # -------------------------------------------------
+
+        distance = source + 1
+
+        if die == distance:
+            return True
+
+        if die > distance:
+
+            for i in range(source + 1, 6):
+
+                if self.points[i] < 0:
+                    return False
+
+            return True
+
+        return False
+
+    # =====================================================
+    # Legal moves for one die
+    # =====================================================
+
+    def legal_moves_for_die(
+        self,
+        die,
+        player=None,
+        die_index=0
+    ):
+
+        if player is None:
+            player = self.current_player
+
+        if self.done:
+            return []
+
+        if die < 1 or die > 6:
+            return []
+
+        moves = []
+
+        # -------------------------------------------------
+        # BAR HAS PRIORITY
+        # -------------------------------------------------
+
+        if self.bar[player] > 0:
+
+            if player == WHITE:
+
+                # White enters from opponent's home side
+                destination = die - 1
+
+            else:
+
+                destination = 24 - die
+
+            if not self.is_blocked(
+                destination,
+                player
+            ):
+
+                moves.append(
+                    Move(
+                        source=BAR,
+                        destination=destination,
+                        die=die,
+                        die_index=die_index
+                    )
+                )
+
+            return moves
+
+        # -------------------------------------------------
+        # Normal moves
+        # -------------------------------------------------
+
+        for source in range(24):
+
+            # Own checker?
+            if self.points[source] * player <= 0:
+                continue
+
+            destination = self.destination_for_die(
+                source,
+                die,
+                player
+            )
+
+            # -------------------------------------------------
+            # Normal board move
+            # -------------------------------------------------
+
+            if 0 <= destination < 24:
+
+                if not self.is_blocked(
+                    destination,
+                    player
+                ):
+
+                    moves.append(
+                        Move(
+                            source=source,
+                            destination=destination,
+                            die=die,
+                            die_index=die_index
+                        )
+                    )
+
+            # -------------------------------------------------
+            # Bear off
+            # -------------------------------------------------
+
+            elif self.can_bear_off(
+                source,
+                die,
+                player
+            ):
+
+                moves.append(
+                    Move(
+                        source=source,
+                        destination=OFF,
+                        die=die,
+                        die_index=die_index
+                    )
+                )
+
+        return moves
+
+    # =====================================================
+    # All legal moves
+    # =====================================================
+
+    def legal_moves(self, player=None):
+
+        if player is None:
+            player = self.current_player
+
+        if self.done:
+            return []
+
+        if not self.dice:
+            return []
+
+        moves = []
+
+        for die_index, die in enumerate(self.dice):
+
+            moves.extend(
+                self.legal_moves_for_die(
+                    die=die,
+                    player=player,
+                    die_index=die_index
+                )
+            )
+
+        return moves
+
+    # =====================================================
+    # Must pass
+    # =====================================================
+
+    def must_pass(self):
+
+        if self.done:
+            return True
+
+        if not self.dice:
+            return True
+
+        return len(
+            self.legal_moves(
+                self.current_player
+            )
+        ) == 0
+
+    # =====================================================
+    # Remove die
+    # =====================================================
+
+    def _consume_die(self, die_index):
+
+        if (
+            die_index < 0
+            or
+            die_index >= len(self.dice)
+        ):
+
+            raise ValueError(
+                "Invalid die index."
+            )
+
+        self.dice.pop(die_index)
+
+    # =====================================================
+    # Make move
+    # =====================================================
+
+    def make_move(self, move):
+
+        if self.done:
+            raise ValueError(
+                "Game is already over."
+            )
+
+        player = self.current_player
+        opponent = self.opponent(player)
+
+        # -------------------------------------------------
+        # Validate die
+        # -------------------------------------------------
+
+        if move.die_index < 0:
+            raise ValueError(
+                "Invalid die index."
+            )
+
+        if move.die_index >= len(self.dice):
+            raise ValueError(
+                "Invalid die index."
+            )
+
+        if self.dice[move.die_index] != move.die:
+            raise ValueError(
+                "Die mismatch."
+            )
+
+        # -------------------------------------------------
+        # Validate against current board
+        # -------------------------------------------------
+
+        legal = self.legal_moves_for_die(
+            die=move.die,
+            player=player,
+            die_index=move.die_index
+        )
+
+        valid = any(
+            m.source == move.source
+            and
+            m.destination == move.destination
+            for m in legal
+        )
+
+        if not valid:
+
+            raise ValueError(
+                f"Illegal move: {move}"
+            )
+
+        # -------------------------------------------------
+        # Consume die FIRST
+        # -------------------------------------------------
+
+        self._consume_die(
+            move.die_index
+        )
+
+        # -------------------------------------------------
+        # Remove checker from source
+        # -------------------------------------------------
+
+        if move.source == BAR:
+
+            if self.bar[player] <= 0:
+                raise RuntimeError(
+                    "No checker on bar."
+                )
+
+            self.bar[player] -= 1
+
+        else:
+
+            if self.points[move.source] * player <= 0:
+                raise RuntimeError(
+                    "Source does not contain player's checker."
+                )
+
+            self.points[move.source] -= player
+
+        # -------------------------------------------------
+        # Bear off
+        # -------------------------------------------------
+
+        if move.destination == OFF:
+
+            self.borne_off[player] += 1
+
+        else:
+
+            destination_value = (
+                self.points[move.destination]
+            )
+
+            # -------------------------------------------------
+            # HIT
+            # -------------------------------------------------
+
+            if destination_value * opponent == 1:
+
+                self.points[move.destination] = 0
+
+                self.bar[opponent] += 1
+
+            # -------------------------------------------------
+            # Place checker
+            # -------------------------------------------------
+
+            self.points[move.destination] += player
+
+        # -------------------------------------------------
+        # WIN CHECK
+        #
+        # Only 15 borne-off checkers ends game.
+        # -------------------------------------------------
+
+        if self.borne_off[player] >= 15:
+
+            self.borne_off[player] = 15
+
+            self.done = True
+            self.winner = player
+
+            self.dice = []
+
+            return
+
+        # -------------------------------------------------
+        # IMPORTANT:
+        #
+        # We DO NOT change player here.
+        #
+        # self_play.py controls the end of the turn.
+        # -------------------------------------------------
+
+    # =====================================================
+    # End turn
+    # =====================================================
+
+    def end_turn(self):
+
+        if self.done:
+            return
+
+        self.dice = []
+
+        self.current_player = (
+            self.opponent(
+                self.current_player
+            )
+        )
+
+    # =====================================================
+    # State
+    # =====================================================
+
+    def get_state(self, player=None):
+
+        if player is None:
+            player = self.current_player
+
+        opponent = self.opponent(player)
+
+        state = []
+
+        # -------------------------------------------------
+        # 24 points × 2
+        # -------------------------------------------------
+
+        for value in self.points:
+
+            own = max(
+                value * player,
+                0
+            )
+
+            enemy = max(
+                value * opponent,
+                0
+            )
+
+            state.append(
+                float(own)
+            )
+
+            state.append(
+                float(enemy)
+            )
+
+        # 48
+        # -------------------------------------------------
+
+        state.append(
+            float(self.bar[player])
+        )
+
+        state.append(
+            float(self.bar[opponent])
+        )
+
+        # 50
+        # -------------------------------------------------
+
+        state.append(
+            float(self.borne_off[player])
+        )
+
+        state.append(
+            float(self.borne_off[opponent])
+        )
+
+        # 52
+        # -------------------------------------------------
+
+        dice = list(self.dice)
+
+        while len(dice) < 4:
+            dice.append(0)
+
+        for die in dice[:4]:
+
+            state.append(
+                float(die) / 6.0
+            )
+
+        # 56
+        # -------------------------------------------------
+
+        state.append(
+            1.0
+            if self.current_player == player
+            else 0.0
+        )
+
+        # 57
+        # -------------------------------------------------
+
+        state.append(
+            1.0
+            if self.done
+            else 0.0
+        )
+
+        # 58
+        # -------------------------------------------------
+
+        if self.winner is None:
+
+            state.append(0.0)
+
+        elif self.winner == player:
+
+            state.append(1.0)
+
+        else:
+
+            state.append(-1.0)
+
+        # 59
+        return state
+
+    # =====================================================
+    # Winner
+    # =====================================================
+
+    def has_won(self, player):
+
+        return (
+            self.borne_off[player] >= 15
+        )
+
+    # =====================================================
+    # String
+    # =====================================================
+
+    def __str__(self):
+
+        player_name = (
+            "WHITE"
+            if self.current_player == WHITE
+            else "BLACK"
+        )
+
+        return (
+            f"Backgammon(\n"
+            f"  current_player={player_name},\n"
+            f"  dice={self.dice},\n"
+            f"  bar={self.bar},\n"
+            f"  borne_off={self.borne_off},\n"
+            f"  winner={self.winner},\n"
+            f"  points={self.points}\n"
+            f")"
+        )
+
+    def encode(self, player=None):
+
+        if player is None:
+            player = self.current_player
+
+        opponent = self.opponent(player)
+
+        state = []
+
+        # =====================================================
+        # Player
+        # =====================================================
+
+        # 0: Player bar
+        state.append(
+            self.bar[player]
+        )
+
+        # 1..24: Player pieces
+        for point in self.points:
+
+            state.append(
+                max(point * player, 0)
+            )
+
+        # 25: Player bear off
+        state.append(
+            self.borne_off[player]
+        )
+
+        # =====================================================
+        # Opponent
+        # =====================================================
+
+        # 26: Opponent bar
+        state.append(
+            self.bar[opponent]
+        )
+
+        # 27..51: Opponent pieces
+        for point in self.points:
+
+            state.append(
+                max(point * opponent, 0)
+            )
+
+        # 52: Opponent bear off
+        state.append(
+            self.borne_off[opponent]
+        )
+
+        # =====================================================
+        # Dice
+        # =====================================================
+
+        # 53..56: Dice
+        dice = list(self.dice)
+
+        while len(dice) < 4:
+            dice.append(0)
+
+        for die in dice[:4]:
+
+            state.append(
+                die
+            )
+
+        return state

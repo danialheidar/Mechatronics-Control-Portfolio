@@ -1,5 +1,5 @@
 # Mechatronics, Control & Robotics Portfolio
-**Danial Heidar** — B.Sc. Student in Mechanical Engineering, University of Tehran[cite: 1]
+**Danial Heidar** — B.Sc. Student in Mechanical Engineering, University of Tehran
 
 This repository organizes my coursework and personal programming projects in **Control Systems**, **Robot Kinematics**, and **AI/Search Algorithms**.
 

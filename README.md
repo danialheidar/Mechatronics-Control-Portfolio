@@ -23,6 +23,9 @@ This repository organizes my coursework and personal programming projects in **C
 ---
 
 ## 3. AI & Algorithmic Programming Projects (Python)
-* **Constraint-Propagation Sudoku Solver (`sudoku_solver_gui.py`):** Combines **Naked/Hidden Singles** inference over a `9×9×9` candidate matrix with **Minimum Remaining Values (MRV)** heuristic branching and iterative stack-based backtracking, wrapped in a **Pygame** GUI.
-* **AlphaZero Practice Implementations (Backgammon, Fading Tic-Tac-Toe, Tic-Tac-Toe):** Self-play agents integrating Monte Carlo Tree Search (MCTS) with neural networks, adapted to stochastic dice transitions in Backgammon.
-* **Neural Pong:** Real-time paddle control agent trained via neural networks.
+* **Constraint-Propagation Sudoku Solver** ([`./3-sodoku ai`](./3-sodoku%20ai)): Combines **Naked/Hidden Singles** inference over a `9×9×9` candidate matrix with **Minimum Remaining Values (MRV)** heuristic branching and iterative stack-based backtracking, wrapped in a **Pygame** GUI.
+* **AlphaZero Practice Implementations:** Self-play agents integrating Monte Carlo Tree Search (MCTS) with neural networks:
+  * **Backgammon** ([`./4-backgammon`](./4-backgammon)) — adapted to stochastic dice transitions.
+  * **Fading Tic-Tac-Toe** ([`./2-fading_tictactoe`](./2-fading_tictactoe))
+  * **Tic-Tac-Toe** ([`./1-TIC TAC TOE`](./1-TIC%20TAC%20TOE))
+* **Neural Pong** ([`./0-neural pong`](./0-neural%20pong)): Real-time paddle control agent trained via neural networks.

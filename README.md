@@ -6,7 +6,7 @@ This repository organizes my coursework and personal programming projects in **C
 ---
 
 ## 1. Rotary Inverted Pendulum — Dynamic Modeling & Control
-* **Project Report:** [`Control_Project_Report.pdf`](./Control_Project_Report.pdf) *(Group project; my primary role was dynamic modeling, stability analysis, and controller design)*[cite: 1, 2]
+* **Project Report:** [`Control_Project_Report.pdf`](./Control_Project_Report.pdf) *(Group project; my primary role was dynamic modeling, stability analysis, and controller design)*
 * **Overview:**
   * Derived nonlinear Euler-Lagrange equations of motion and linearized the system around the unstable upright equilibrium.
   * Designed and evaluated **P, PI, PD, PID** controllers and a **Lead Compensator** in **MATLAB** using Root Locus, Bode, and Nyquist stability analyses.
